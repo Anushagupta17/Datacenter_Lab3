@@ -19,11 +19,31 @@ then
     echo "Unable to find your streaming JAR"
     exit 1
 fi
-   
-rm -rf stream-output
+
+hdfs dfs -rm -r stream-output
 hadoop jar $STREAM \
-	-mapper CheckCitationCountMapper.py \
-	-reducer CheckCitationCountReducer.py \
-	-file CheckCitationCountMapper.py -file CheckCitationCountReducer.py \
+	-mapper m1.py \
+	-reducer r1.py \
+	-file m1.py -file r1.py \
 	-input input -output stream-output
-	
+
+hdfs dfs -rm -r input/cite75_99.txt
+hdfs dfs -cp stream-output/part* input
+
+hdfs dfs -rm -r stream-output
+hadoop jar $STREAM \
+	-mapper m2.py \
+	-reducer r2.py \
+	-file m2.py -file r2.py \
+	-input input -output stream-output
+
+hdfs dfs -rm -r input/part*
+hdfs dfs -cp stream-output/part* input
+
+hdfs dfs -rm -r stream-output
+hadoop jar $STREAM \
+	-mapper m3.py \
+	-reducer r3.py \
+	-file m3.py -file r3.py \
+	-input input -output stream-output
+
