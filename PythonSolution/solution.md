@@ -13,41 +13,50 @@ The number of Reducers: 3
 Setup:
 
 Makefile:
-> The makefile makes sure that the previous input directory is deleted.
-> Create a new input directory.
-> Copy the required input files (having comma seperated values), namely cite75_99.txt and apat63_99.txt as file01 and file02 respectively in the input directory.
-> Hit make prepare command and get the setup ready for passing the input to the mapper 1.
+1. The makefile makes sure that the previous input directory is deleted.
+2. Create a new input directory.
+3. Copy the required input files (having comma seperated values), namely cite75_99.txt and apat63_99.txt as cite75_99.txt and apat63_99.txt respectively in the input directory.
+4. Hit make prepare command and get the setup ready for passing the input to the mapper 1.
 
 Hit make stream:
 
 Group 1 --- Mapper 1 Reducer 1
------Mapper 1------
-> Passes the files cite75_99.txt and apat63_99.txt to Mapper 1.
-> Mapper 1 differentiates wheather the content is coming from file01 or file02 based on the number of fields. It will be having either 2 or 11 as the number of fields.
-> Mapper 1 then outputs the key value pairs to stdout which is then readable by the reducer 1 to process further.
-> Output of Mapper 1 / Input to the Reducer 1 is in the form : "CITING","CITED" for entries in the cite75_99.txt and "Patent", "The_other_fields"
------Reducer 1-----
->The reducer consumes the above output made to stdout as an input for itself and sorts the output on CITED id.
->Then we use reducer side join to get output as : CITING, CITED, CITING_STATE to the output files in the stream output folder
+
+Mapper 1
+
+1. Passes the files cite75_99.txt and apat63_99.txt to Mapper 1.
+2. Mapper 1 differentiates wheather the content is coming from file01 or file02 based on the number of fields. It will be having either 2 or 11 as the number of fields.
+3. Mapper 1 then outputs the key value pairs to stdout which is then readable by the reducer 1 to process further.
+4. Output of Mapper 1 / Input to the Reducer 1 is in the form : "CITING","CITED" for entries in the cite75_99.txt and "Patent", "The_other_fields" for entries in apat63_99.txt.
+
+Reducer 1
+
+1. The reducer consumes the above output made to stdout as an input for itself and sorts the output on CITED id.
+2. Then we use reducer side join to get output as : CITING, CITED, CITING_STATE to the output files in the stream output folder
 
 RUN-MAP-REDUCE file
-> Copies the output files got from reducer 1 to the input folder back, so that we can send those input files as input to Mapper 2
-> Deletes the stream-output folder now.
-> Deletes cite75_99.txt a.k.a file01
+1. Copies the output files got from reducer 1 to the input folder back, so that we can send those input files as input to the mapper 2
+2. Deletes the stream-output folder now.
+3. Deletes cite75_99.txt a.k.a file01
  
 
 Group 2 -- Mapper 2 Reducer 2 and creation of Intermediate Table
------Mapper 2-------
-> Mapper 2 picks the input files and apat63_99.txt a.k.a file02 file from the input folder.
-> It reads the file in random order and differentiates the content on the basis of number of fields i.e 3 or 11
-> The mapper outputs the "CITED", "CITING", "CITING_STATE" and "PATENT", "The_other_fields"
------Reducer 2------ 
-> It gets CITED id in a sorted form.
-> Now we use reducer side join to figure out the state of CITED ID.
-> It finally outputs the following Intermediate table -- "CITED", "CITED_STATE", "CITING", "CITING_STATE"
+
+Mapper 2
+
+1. Mapper 2 picks the input files and apat63_99.txt a.k.a file02 file from the input folder.
+2. It reads the file in random order and differentiates the content on the basis of number of fields i.e 3 or 11
+3. The mapper outputs the "CITED", "CITING", "CITING_STATE" and "PATENT", "The_other_fields"
+
+Reducer 2 
+
+1. It gets CITED id in a sorted form.
+2. Now we use reducer side join to figure out the state of CITED ID.
+3. It finally outputs the following Intermediate table -- "CITED", "CITED_STATE", "CITING", "CITING_STATE"
 
 
-Mapper 3:
+Mapper 3
+
 1) Reads apat63_99.txt and output files copied from reducer2 into input folder.
 Now, CITING should be the key for 3rd reducer join.
 2) Mapper 3 outputs CITING CITING_STATE CITED_STATE
